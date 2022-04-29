@@ -25,12 +25,16 @@ class ObjectDetectionService:
     def detect(self, uuid):
         detectedResults = []
         for camNum in self.camerasMap:
+            print('canNum:', camNum)
             camara = cv.VideoCapture(camNum)
+            camara.read()
+            camara.read()
+            camara.read()
+            camara.read()
             _, image = camara.read()
             cv.imwrite('cam{}_original.jpg'.format(camNum), image)
             grayImage = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-            _, thresh = cv.threshold(grayImage, np.mean(
-                grayImage), 255, cv.THRESH_BINARY_INV)
+            _, thresh = cv.threshold(grayImage, 130, 255, cv.THRESH_BINARY_INV)
             kernel = np.ones((5, 5), np.uint8)
             opening = cv.morphologyEx(
                 thresh, cv.MORPH_OPEN, kernel, iterations=2)
@@ -89,11 +93,14 @@ class ObjectDetectionService:
         detectedImages = []
         for camNum in self.camerasMap:
             camara = cv.VideoCapture(camNum)
+            camara.read()
+            camara.read()
+            camara.read()
+            camara.read()
             _, image = camara.read()
             cv.imwrite('cam{}_original.jpg'.format(camNum), image)
             grayImage = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-            _, thresh = cv.threshold(grayImage, np.mean(
-                grayImage), 255, cv.THRESH_BINARY_INV)
+            _, thresh = cv.threshold(grayImage, 130, 255, cv.THRESH_BINARY_INV)
             kernel = np.ones((5, 5), np.uint8)
             opening = cv.morphologyEx(
                 thresh, cv.MORPH_OPEN, kernel, iterations=2)
@@ -118,8 +125,8 @@ class ObjectDetectionService:
                 dbObject = cv.imread(file, 0)
                 kp1, des1 = sift.detectAndCompute(detectedImage, None)
                 kp2, des2 = sift.detectAndCompute(dbObject, None)
-                print("des1: descriptors=", des1.shape)
-                print("des2: descriptors=", des2.shape)
+                # print("des1: descriptors=", des1.shape)
+                # print("des2: descriptors=", des2.shape)
                 # FLANN parameters
                 FLANN_INDEX_KDTREE = 1
                 index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
