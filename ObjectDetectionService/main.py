@@ -50,7 +50,11 @@ class ObjectDetectionService:
                     ROI = image[y:y+h, x:x+w]
                     cv.imwrite("cam{}_ROI_{}.jpg".format(
                         camNum, imageNumber), ROI)
+                    cv.drawContours(image, contours, -1, (0, 255, 0), 3)
+                    cv.imwrite("cam{}_detected_{}.jpg".format(
+                        camNum, imageNumber), image)
                     imageNumber += 1
+
             detectedResults.append(
                 {'image': image, 'detectedObjects': detectedObjects})
             camara.release()

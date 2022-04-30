@@ -28,7 +28,7 @@ def detectObject():
         macAddresses = scanResult['data']
     print('objectDetectedCount:', objectDetectedCount)
     print('macAddresses:', macAddresses)
-    if len(macAddresses) != objectDetectedCount:
+    if (len(macAddresses) != objectDetectedCount) or len(macAddresses) == 0 or objectDetectedCount == 0:
         response = app.response_class(
             response=json.dumps({'message': 'invalid tag'}),
             status=400,
