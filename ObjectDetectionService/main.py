@@ -14,31 +14,35 @@ load_dotenv()
 class ObjectDetectionService:
     def __init__(self):
         self.camerasMap = os.getenv('DETECT_CAMARAS').split(',')
+        self.camerasMap = list(filter(self.filterExistCam, self.camerasMap))
         for index in range(len(self.camerasMap)):
-            self.camerasMap[index] = int(self.camerasMap[index])
+            self.camerasMap[index] = os.path.realpath(self.camerasMap[index])
             cap = cv.VideoCapture(self.camerasMap[index])
-            cap.read()
-            cap.read()
-            cap.read()
+            for i in range(25):
+                cap.read()
             cap.release()
+
+    def filterExistCam(self, camPath):
+        if not os.path.exists(camPath):
+            print('camPath:', camPath)
+        return os.path.exists(camPath)
 
     def detect(self, uuid):
         detectedResults = []
+        cnt = 0
         for camNum in self.camerasMap:
-            print('canNum:', camNum)
+            print('camera:', camNum)
             camara = cv.VideoCapture(camNum)
-            camara.read()
-            camara.read()
-            camara.read()
-            camara.read()
+            for i in range(50):
+                camara.read()
             _, image = camara.read()
-            cv.imwrite('cam{}_original.jpg'.format(camNum), image)
+            cv.imwrite('cam{}_original.jpg'.format(cnt), image)
             grayImage = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-            _, thresh = cv.threshold(grayImage, 130, 255, cv.THRESH_BINARY_INV)
+            _, thresh = cv.threshold(grayImage, 135, 255, cv.THRESH_BINARY_INV)
             kernel = np.ones((5, 5), np.uint8)
             opening = cv.morphologyEx(
                 thresh, cv.MORPH_OPEN, kernel, iterations=2)
-            cv.imwrite('cam{}_removed_noise.jpg'.format(camNum), opening)
+            cv.imwrite('cam{}_removed_noise.jpg'.format(cnt), opening)
             contours, hierarchy = cv.findContours(
                 opening, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
             imageNumber = 0
@@ -49,15 +53,17 @@ class ObjectDetectionService:
                     detectedObjects.append({'x': x, 'y': y, 'w': w, 'h': h})
                     ROI = image[y:y+h, x:x+w]
                     cv.imwrite("cam{}_ROI_{}.jpg".format(
-                        camNum, imageNumber), ROI)
-                    cv.drawContours(image, contours, -1, (0, 255, 0), 3)
+                        cnt, imageNumber), ROI)
+                    imageCopy = image.copy()
+                    cv.drawContours(imageCopy, contours, -1, (0, 255, 0), 3)
                     cv.imwrite("cam{}_detected_{}.jpg".format(
-                        camNum, imageNumber), image)
+                        cnt, imageNumber), imageCopy)
                     imageNumber += 1
 
             detectedResults.append(
                 {'image': image, 'detectedObjects': detectedObjects})
             camara.release()
+            cnt += 1
         saveDetectedResults = copy.deepcopy(detectedResults)
         for saveDetectedResult in saveDetectedResults:
             _, buffer = cv.imencode('.jpg', saveDetectedResult['image'])
@@ -104,7 +110,7 @@ class ObjectDetectionService:
             _, image = camara.read()
             cv.imwrite('cam{}_original.jpg'.format(camNum), image)
             grayImage = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-            _, thresh = cv.threshold(grayImage, 130, 255, cv.THRESH_BINARY_INV)
+            _, thresh = cv.threshold(grayImage, 166, 255, cv.THRESH_BINARY_INV)
             kernel = np.ones((5, 5), np.uint8)
             opening = cv.morphologyEx(
                 thresh, cv.MORPH_OPEN, kernel, iterations=2)
